@@ -66,16 +66,16 @@ Backend conectado a base de datos
 
 ### Estructura del Repositorio
 
-├── 0_ml_prediction/       # Subentorno virtual y scripts de ML
-│   ├── data/
-│   ├── models/
-│   ├── notebooks/
-│   ├── src/
-│   ├── visuals/
-│   └── requirements.txt
-├── data/                  # Datasets originales y procesados
-    ├── processed/
+├── 0_ml_prediction/       # Subentorno virtual y scripts de ML  
+│   ├── data/  
+│   ├── models/   
+│   ├── notebooks/  
+│   ├── src/  
+│   ├── visuals/  
+│   └── requirements.txt  
+├── data/                  # Datasets originales y procesados  
+    ├── processed/  
 │   └── raw/
-├── my_scripts/            # Scripts de ETL
-├── notebooks/             # Notebooks de análisis y pruebas
-└── README.md              
+├── my_scripts/            # Scripts de ETL  
+├── notebooks/             # Notebooks de análisis y pruebas  
+└── README.md                 

@@ -7,7 +7,7 @@ import re
 import json
 from dotenv import load_dotenv
 import os
-import ast  # Import the ast module
+import ast 
 
 load_dotenv()
 
@@ -16,14 +16,14 @@ TABLE_NAME = 'all_events'
 UNIQUE_ID_COLUMN = 'event_id'
 LIST_COLUMNS_TO_CONVERT = ['tags']
 
-# --- Function to safely parse a list ---
+# --- Función para analizar una lista de forma segura ---
 def safe_parse_list(tag_str):
     try:
         return ast.literal_eval(tag_str) if isinstance(tag_str, str) else tag_str
     except:
         return []
 
-# --- English to Spanish translation mapping ---
+# --- Mapeo de traducción de inglés a español ---
 english_tags = [
     'Audio', 'Baby', 'Babygroup', 'Bookshop', 'Children', 'Children & Youth',
     'Childrenandfamilies', 'Childrens', 'Class, Training, or Workshop', 'Community',
@@ -42,10 +42,10 @@ spanish_tags = [
     'Narración de cuentos', 'Taller', 'eventos_infantiles'
 ]
 
-# --- Create translation dictionary ---
+# --- Crear diccionario de traducción ---
 translation_dict = dict(zip(english_tags, spanish_tags))
 
-# --- Function to extract age information ---
+# --- Función para extraer información de edad ---
 def extract_age_final(row):
     text = f"{row['name']} {row['summary']}" if pd.notna(row['summary']) else row['name']
 
@@ -105,7 +105,7 @@ def extract_age_final(row):
 
     return pd.Series({'age_range': age_range_col, 'min_age': final_min_age, 'max_age': final_max_age})
 
-# --- Extract data from Eventbrite ---
+# --- Extraer datos de Eventbrite ---
 url = "https://www.eventbrite.es/d/spain/all-events/?subcategories=15003%2C15004%2C15005%2C15006&page=1"
 
 headers = {
@@ -179,20 +179,20 @@ if response.status_code == 200:
             }
             extracted_data.append(item)
 
-        # Create DataFrame from extracted data
+        # Crear un DataFrame a partir de los datos extraídos
         eventbrite_df = pd.DataFrame(extracted_data)
 
-        # --- Translate tags to Spanish for Eventbrite ---
+        # --- Traducir etiquetas al español para Eventbrite ---
         def safe_parse_list(tag_str):
             try:
                 return ast.literal_eval(tag_str) if isinstance(tag_str, str) else tag_str
             except:
                 return []
 
-        # Step 1: Make sure 'tags' are proper lists (not strings)
+        # Asegurarse de que las 'etiquetas' sean listas adecuadas (no cadenas)
         eventbrite_df['tags'] = eventbrite_df['tags'].apply(safe_parse_list)
 
-        # Step 2: Translate tags for 'eventbrite' data_source rows
+        # Traducir las etiquetas para las filas de la fuente de datos 'eventbrite'
         def translate_tag_list(tag_list):
             return [translation_dict.get(tag.strip(), tag.strip()) for tag in tag_list]
 
@@ -201,10 +201,10 @@ if response.status_code == 200:
         )
     else:
         print("No events data found in Eventbrite response.")
-        eventbrite_df = pd.DataFrame() # Initialize an empty DataFrame
+        eventbrite_df = pd.DataFrame() # Inicializar un DataFrame vacío
 else:
     print(f"Failed to fetch Eventbrite data. Status code: {response.status_code}")
-    eventbrite_df = pd.DataFrame() # Initialize an empty DataFrame
+    eventbrite_df = pd.DataFrame() # Inicializar un DataFrame vacío
 
 # Extraer datos ayuntamiento de Madrid
 
@@ -226,24 +226,24 @@ try:
             print(df.head())
         else:
             print("The list of events was not found within the '@graph' key.")
-            df = pd.DataFrame() # Initialize an empty DataFrame
+            df = pd.DataFrame() # Inicializar un DataFrame vacío
     else:
         print("Parsed JSON is not a dictionary as expected.")
-        df = pd.DataFrame() # Initialize an empty DataFrame
+        df = pd.DataFrame() # Inicializar un DataFrame vacío
 
 except requests.exceptions.RequestException as e:
     print(f"Error fetching data from Ayuntamiento de Madrid: {e}")
-    df = pd.DataFrame() # Initialize an empty DataFrame
+    df = pd.DataFrame() # Inicializar un DataFrame vacío
 except json.JSONDecodeError as e:
     print(f"Error decoding JSON from Ayuntamiento de Madrid: {e}")
-    df = pd.DataFrame() # Initialize an empty DataFrame
+    df = pd.DataFrame() # Inicializar un DataFrame vacío
 except Exception as e:
     print(f"An unexpected error occurred while fetching Ayuntamiento de Madrid data: {e}")
-    df = pd.DataFrame() # Initialize an empty DataFrame
+    df = pd.DataFrame() # Inicializar un DataFrame vacío
 
 if not df.empty:
     # Haciendo el filtrado del dataset
-    filtered_df = df[df['audience'].isin(['Familias', 'Niños', 'Jovenes,Niños', 'Niños,Familias', 'Jovenes,Niños,Familias'])].copy() # Use .copy() to avoid SettingWithCopyWarning
+    filtered_df = df[df['audience'].isin(['Familias', 'Niños', 'Jovenes,Niños', 'Niños,Familias', 'Jovenes,Niños,Familias'])].copy() # Usar .copy() para evitar SettingWithCopyWarning
 
     extracted_data = []
     for index, row in filtered_df.iterrows():
@@ -276,7 +276,7 @@ if not df.empty:
     print(ayuntamiento_madrid_df.head())
     print(ayuntamiento_madrid_df.info())
 else:
-    ayuntamiento_madrid_df = pd.DataFrame() # Initialize an empty DataFrame
+    ayuntamiento_madrid_df = pd.DataFrame() # Inicializar un DataFrame vacío
 
 # Concatenando los datos extraidos
 
@@ -286,7 +286,7 @@ dataframes_list = [eventbrite_df, ayuntamiento_madrid_df]
 # Concatenando los dataframes
 combined_df = pd.concat(dataframes_list, ignore_index=True)
 
-# Applying the age extraction function to the combined DataFrame
+# Aplicación de la función de extracción de edad al DataFrame combinado
 combined_df[['age_range', 'min_age', 'max_age']] = combined_df.apply(extract_age_final, axis=1)
 
 combined_df.to_csv('data/raw/combined_df.csv',index=False)
@@ -299,7 +299,7 @@ def update_event_database_render(current_events_df):
         conn = psycopg2.connect(RENDER_DB_URI)
         cursor = conn.cursor()
 
-        # Add the new columns if they don't exist
+        # Agrega las nuevas columnas si no existen
         cursor.execute(f"ALTER TABLE {TABLE_NAME} ADD COLUMN IF NOT EXISTS age_range TEXT")
         cursor.execute(f"ALTER TABLE {TABLE_NAME} ADD COLUMN IF NOT EXISTS min_age INTEGER")
         cursor.execute(f"ALTER TABLE {TABLE_NAME} ADD COLUMN IF NOT EXISTS max_age INTEGER")
@@ -328,7 +328,7 @@ def update_event_database_render(current_events_df):
                     else:
                         data_to_insert.append(value)
 
-                # Handle potential None values for min_age and max_age
+                # Manejar valores potenciales Ninguno para min_age y max_age
                 min_age_val = row['min_age'] if pd.notna(row['min_age']) else None
                 max_age_val = row['max_age'] if pd.notna(row['max_age']) else None
 
@@ -368,11 +368,11 @@ def load_all_events_from_db_render():
 
 
 
-# --- Execute the data extraction and database update ---
+# --- Ejecutar la extracción de datos y la actualización de la base de datos ---
 dataframes_list = [eventbrite_df, ayuntamiento_madrid_df]
 combined_df = pd.concat(dataframes_list, ignore_index=True)
 
-# Apply the age extraction function
+# Aplicar la función de extracción de edad
 combined_df[['age_range', 'min_age', 'max_age']] = combined_df.apply(extract_age_final, axis=1)
 
 print("First few rows of combined_df with age columns:")

@@ -74,8 +74,8 @@ Backend conectado a base de datos
 │   ├── visuals/  
 │   └── requirements.txt  
 ├── data/                  # Datasets originales y procesados  
-    ├── processed/  
-│   └── raw/
+│    ├── processed/    
+│   └── raw/  
 ├── my_scripts/            # Scripts de ETL  
 ├── notebooks/             # Notebooks de análisis y pruebas  
 └── README.md                 
